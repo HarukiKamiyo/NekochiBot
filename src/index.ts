@@ -4,12 +4,12 @@ import {
   REST,
   Routes,
   SlashCommandBuilder,
-} from "discord.js"; // 追加
+} from "discord.js";
 import dotenv from "dotenv";
 import voiceStateUpdateEvent from "./events/voiceStateUpdate";
 import interactionCreateEvent from "./events/interactionCreate";
 import { startServer } from "./server";
-import { TOKEN } from "./config";
+import { TOKEN } from "./config"; // GEMINI_API_KEY はここでは使わないので削除してもOK
 
 const client = new Client({
   intents: [
@@ -35,25 +35,29 @@ const commands = [
 
 async function initialize() {
   try {
-    // 環境変数の読み込み
     dotenv.config();
-
-    // Koyeb ヘルスチェック用サーバーを起動
     startServer();
 
-    // Bot の準備完了イベント
+    // エラー関連のイベントリスナー（デバッグ用）
+    client.on("error", (error) =>
+      console.error("Discord Client Error:", error),
+    );
+    client.on("warn", (info) => console.warn("Discord Client Warning:", info));
+    client.on("shardDisconnect", (event, id) =>
+      console.log(`Shard ${id} disconnected:`),
+    );
+    client.on("shardReconnecting", (id) =>
+      console.log(`Shard ${id} reconnecting...`),
+    );
+
     client.on("ready", async () => {
       console.log(`${client.user?.tag} がログインしました！`);
 
-      // Discord APIへ登録申請するためのRESTクライアントを作成（事務手続き用の窓口）
+      // スラッシュコマンドの登録
       const rest = new REST({ version: "10" }).setToken(TOKEN!);
       try {
         console.log("スラッシュコマンドを登録中...");
-
-        // Bot自身のIDが必要なので、user情報があるか確認してから実行
         if (client.user) {
-          // グローバルコマンドとして登録（参加している全サーバーで使えるようになる）
-          // ※反映まで最大1時間くらいかかることもあるから注意
           await rest.put(Routes.applicationCommands(client.user.id), {
             body: commands,
           });
@@ -64,17 +68,16 @@ async function initialize() {
       }
     });
 
-    // ボイスチャンネルの入退室イベントを登録
     voiceStateUpdateEvent(client);
-    // スラッシュコマンドのインタラクションイベントを登録
     interactionCreateEvent(client);
 
-    // Discord Bot へのログイン
-    await client.login(process.env.TOKEN);
+    await client.login(TOKEN);
+    // console.log("Bot がログインしました！");
   } catch (error) {
     console.error("アプリの初期化中にエラーが発生しました:", error);
+    // エラー時はプロセスを強制終了させて Koyeb に再起動させる
+    process.exit(1);
   }
 }
 
-// アプリの初期化を実行
 initialize();

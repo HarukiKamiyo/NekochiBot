@@ -1,14 +1,15 @@
 import express from "express";
 
 const app = express();
-const port = 3000;
 
+// アクセスがあるたびに時間をログに出す
 app.get("/", (req, res) => {
+  console.log(`[${new Date().toISOString()}] Health check ping received.`);
   res.send("Nekochi Bot Server is Online.");
 });
 
 export function startServer() {
-  app.listen(port, () => {
-    console.log(`Koyeb health check server listening on port ${port}`);
+  app.listen(3000, () => {
+    console.log("Koyeb health check server listening on port 3000");
   });
 }
