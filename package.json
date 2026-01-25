@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node dist/index.js",
     "dev": "nodemon",
-    "build": "tsc -p ."
+    "build": "tsc -p .",
+    "deploy": "ts-node src/deploy-commands.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
