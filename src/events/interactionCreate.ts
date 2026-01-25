@@ -25,8 +25,16 @@ export default function interactionCreateEvent(client: Client) {
           return;
         }
 
+        // 指示文とユーザーの入力を合体させる
+        // Template Literal (バッククォート) を使って、指示を埋め込みます
+        const modifiedPrompt = `
+以下の質問に対して、1〜3行程度の簡潔な文章で回答してください。
+
+質問: ${prompt}
+        `.trim();
+
         // Geminiに送信して回答を生成
-        const result = await model.generateContent(prompt);
+        const result = await model.generateContent(modifiedPrompt);
         const response = result.response.text();
 
         // ユーザー名を取得（サーバーでの表示名、なければユーザー名）
