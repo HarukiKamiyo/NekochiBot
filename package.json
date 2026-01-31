@@ -3,11 +3,13 @@
   "version": "0.1.2",
   "description": "Nekochi Bot by Nekochi",
   "main": "dist/index.js",
+  "type": "module",
   "scripts": {
     "start": "node dist/index.js",
     "dev": "nodemon",
     "build": "tsc -p .",
-    "deploy": "ts-node src/deploy-commands.ts"
+    "deploy": "npm run build && npm run deploy:js",
+    "deploy:js": "node dist/deploy-commands.js"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

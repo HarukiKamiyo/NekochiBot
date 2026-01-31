@@ -74,6 +74,33 @@ npm run deploy
 
 ---
 
+## 📚 TypeScriptとESMの規約
+
+このプロジェクトは、最新のJavaScript標準である **ES Modules (ESM)** を使用しています。
+これに伴い、いくつかの重要な規約があります。
+
+### インポートパスには `.js` 拡張子が必須
+
+`src` ディレクトリ内のTypeScriptファイル (`.ts`) で、他のファイルを `import` する際には、必ずパスの末尾に **`.js`** を付ける必要があります。
+
+```typescript
+// OK
+import { TOKEN } from "./config.js";
+
+// NG (エラーになります)
+import { TOKEN } from "./config";
+```
+
+#### なぜ？
+
+1.  **Node.jsのESM仕様:** このプロジェクトは `package.json` で `"type": "module"` と設定されており、ESMとして動作します。Node.jsのESM仕様では、`import` する際に拡張子を含めた完全なファイルパスを明記することが必須となっています。
+2.  **実行されるのはJavaScript:** TypeScript (`.ts`) ファイルは、実行前に `tsc` によって JavaScript (`.js`) にコンパイルされ、`dist` ディレクトリに出力されます。実際にNode.jsが実行するのは、このコンパイル後の `.js` ファイルです。
+3.  **コンパイル後を見据えた記述:** そのため、TypeScriptのソースコードの段階で、コンパイル後の `import` 文が正しいパス (`./config.js`) を指すように、あらかじめ `.js` 拡張子を付けておく必要があります。
+
+これは `tsconfig.json` の `"moduleResolution": "NodeNext"` 設定によって強制される、モダンなNode.js開発における標準的な作法です。
+
+---
+
 ## 🏃‍♂️ Botの起動
 
 ### 開発モード (ローカル)

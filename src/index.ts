@@ -3,27 +3,49 @@
  * @description このファイルはDiscordボットのメインエントリーポイントです。
  *              ボットの起動、設定、イベントハンドラの登録を行います。
  */
-import { GatewayIntentBits, Client } from "discord.js"; // Discord API とのやり取りに必要なクラスをインポート
-import dotenv from "dotenv"; // .env ファイルから環境変数をロードするために使用
-import voiceStateUpdateEvent from "./events/voiceStateUpdate"; // 音声チャンネルの状態変化を処理するイベントハンドラ
-import interactionCreateEvent from "./events/interactionCreate"; // スラッシュコマンドやボタン操作などのインタラクションを処理するイベントハンドラ
-import { startServer } from "./server"; // ヘルスチェック用のサーバーを起動する関数
-import { TOKEN } from "./config"; // ボットの認証トークンなどの設定をインポート
+import { GatewayIntentBits, Client, Collection } from "discord.js";
+import dotenv from "dotenv";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import voiceStateUpdateEvent from "./events/voiceStateUpdate.js";
+import interactionCreateEvent from "./events/interactionCreate.js";
+import { startServer } from "./server.js";
+import { TOKEN } from "./config.js";
 
-// Discord クライアントのインスタンスを作成
+// ESMでは __dirname は使えないため、import.meta.urlから取得する
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const client = new Client({
-  // ボットが購読するイベントの種類（インテント）を設定
   intents: [
-    GatewayIntentBits.Guilds, // サーバー関連のイベント (参加、退出など)
-    GatewayIntentBits.GuildMessages, // サーバー内のメッセージ関連イベント (メッセージ作成、編集、削除など)
-    GatewayIntentBits.MessageContent, // メッセージの内容へのアクセス (v13以降で特権インテント)
-    GatewayIntentBits.GuildVoiceStates, // サーバー内のボイスチャンネルの状態変化 (参加、退出、ミュートなど)
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildVoiceStates,
   ],
 });
 
+client.commands = new Collection();
+
+async function loadCommands() {
+  const commandsPath = path.join(__dirname, "commands");
+  const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith(".js"));
+
+  for (const file of commandFiles) {
+    const filePath = path.join(commandsPath, file);
+    const command = await import(filePath);
+    if ('data' in command && 'execute' in command) {
+      client.commands.set(command.data.name, command);
+    } else {
+      console.log(`[警告] ${filePath} のコマンドは、必須の "data" または "execute" プロパティを欠いています。`);
+    }
+  }
+}
+
 async function initialize() {
   try {
-    // .env ファイルから環境変数をロード
+    await loadCommands(); // コマンドをロード
     dotenv.config();
     // ヘルスチェックやその他のAPIを公開するサーバーを起動
     startServer();

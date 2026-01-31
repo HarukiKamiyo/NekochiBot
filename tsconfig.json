@@ -11,6 +11,12 @@
     "resolveJsonModule": true, // JSONファイルのインポートを許可する
     "moduleResolution": "NodeNext"
   },
+  "ts-node": {
+    "esm": true,
+    "compilerOptions": {
+      "module": "NodeNext"
+    }
+  },
   "include": [
     "./src/**/*.ts", // TypeScriptファイルの格納ディレクトリを指定
     "types/**/*.d.ts" // 型定義ファイルの格納ディレクトリを指定

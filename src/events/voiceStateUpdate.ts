@@ -6,8 +6,9 @@
  */
 // src/events/voiceStateUpdate.ts
 import { VoiceState, Client, TextChannel, EmbedBuilder } from "discord.js"; // Discord API からの音声状態、クライアント、テキストチャンネル、埋め込みメッセージに必要なクラスをインポート
-import { TARGET_VOICE_CHANNEL_ID, NOTIFICATION_CHANNEL_ID } from "../config"; // 設定ファイルから対象のボイスチャンネルIDと通知チャンネルIDをインポート
-import { formatDuration } from "../utils"; // 滞在時間のフォーマットに使用するユーティリティ関数をインポート
+import { TARGET_VOICE_CHANNEL_ID, NOTIFICATION_CHANNEL_ID } from "../config.js"; // 設定ファイルから対象のボイスチャンネルIDと通知チャンネルIDをインポート
+import { formatDuration } from "../utils.js"; // 滞在時間のフォーマットに使用するユーティリティ関数をインポート
+import { getPraiseFromGemini } from "../gemini.js";
 
 // 各ユーザーのボイスチャンネル入室時刻を記録するためのオブジェクト。
 // キーはユーザーID、値は入室した`Date`オブジェクト。
@@ -91,7 +92,10 @@ export default (client: Client) => {
         const duration = exitTime.getTime() - entryTime.getTime(); // 滞在時間をミリ秒で計算
         delete userEntryTimes[member.id]; // 記録からユーザーの入室時刻を削除
 
-        const formattedDuration = formatDuration(duration); // 滞在時間を読みやすい形式にフォーマット
+        // Geminiから褒め言葉を取得
+        const praise = await getPraiseFromGemini(duration, member.displayName);
+
+        const formattedDuration = formatDuration(duration); // 埋め込みメッセージ用に別途フォーマット
         const embed = new EmbedBuilder()
           .setColor(0xff0000) // 赤色
           .setAuthor({
@@ -99,7 +103,7 @@ export default (client: Client) => {
             iconURL: member.displayAvatarURL(),
           })
           .setDescription(
-            `${member.displayName} が勉強終了しました🍵 \n ${member.displayName} が成長した時間 : ${formattedDuration}`,
+            `${member.displayName} が勉強終了しました🍵\n**勉強時間**: ${formattedDuration}\n\n${praise}`,
           )
           .setTimestamp();
         notificationChannelText.send({ embeds: [embed] });

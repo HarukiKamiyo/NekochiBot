@@ -1,26 +1,31 @@
-import { REST, Routes, SlashCommandBuilder } from "discord.js";
-import { TOKEN, APPLICATION_ID } from "./config";
+import { REST, Routes } from "discord.js";
+import { TOKEN, APPLICATION_ID } from "./config.js";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
-// 登録したいコマンドの定義
-const commands = [
-  new SlashCommandBuilder()
-    .setName("gemini")
-    .setDescription("Geminiとお話しします")
-    .addStringOption((option) =>
-      option
-        .setName("prompt")
-        .setDescription("Geminiへの質問")
-        .setRequired(true),
-    ),
-].map((command) => command.toJSON());
+// ESMでは __dirname は使えないため、import.meta.urlから取得する
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const rest = new REST({ version: "10" }).setToken(TOKEN!);
 
 (async () => {
   try {
-    console.log("📦 スラッシュコマンドの登録を開始します...");
+    const commands = [];
+    const commandsPath = path.join(__dirname, "commands");
+    const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith(".js"));
 
-    // グローバルコマンドとして登録（反映に時間がかかる場合があります）
+    for (const file of commandFiles) {
+      const filePath = path.join(commandsPath, file);
+      const command = await import(filePath);
+      if ('data' in command) {
+        commands.push(command.data.toJSON());
+      }
+    }
+
+    console.log(`📦 ${commands.length}個のスラッシュコマンドの登録を開始します...`);
+
     await rest.put(Routes.applicationCommands(APPLICATION_ID!), {
       body: commands,
     });
