@@ -93,7 +93,7 @@ export default (client: Client) => {
         delete userEntryTimes[member.id]; // 記録からユーザーの入室時刻を削除
 
         // Geminiから褒め言葉を取得
-        const praise = await getPraiseFromGemini(duration, member.displayName);
+        const praise = await getPraiseFromGemini(duration, member.displayName, null);
 
         const formattedDuration = formatDuration(duration); // 埋め込みメッセージ用に別途フォーマット
         const embed = new EmbedBuilder()
