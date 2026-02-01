@@ -71,6 +71,10 @@ async function initialize() {
     voiceStateUpdateEvent(client); // 音声状態更新イベントのリスナーを登録
     interactionCreateEvent(client); // インタラクションイベントのリスナーを登録
 
+    // 1秒待機して、他の初期化処理が完了するのを待つ
+    console.log("1秒待機してからDiscordにログインします...");
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
     // Discord にログイン
     await client.login(TOKEN);
   } catch (error) {
