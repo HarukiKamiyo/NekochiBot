@@ -1,5 +1,5 @@
 // src/events/interactionCreate.ts
-import { Client, Events, Interaction } from "discord.js";
+import { Client, Events, Interaction, MessageFlags } from "discord.js";
 
 export default function interactionCreateEvent(client: Client) {
   client.on(Events.InteractionCreate, async (interaction: Interaction) => {
@@ -14,7 +14,7 @@ export default function interactionCreateEvent(client: Client) {
       console.error(`'${interaction.commandName}' というコマンドは見つかりませんでした。`);
       await interaction.reply({
         content: "エラー: コマンドが見つかりません。",
-        ephemeral: true,
+        flags: [MessageFlags.Ephemeral],
       });
       return;
     }
@@ -28,12 +28,12 @@ export default function interactionCreateEvent(client: Client) {
       if (interaction.replied || interaction.deferred) {
         await interaction.followUp({
           content: "コマンドの実行中にエラーが発生しました。",
-          ephemeral: true,
+          flags: [MessageFlags.Ephemeral],
         });
       } else {
         await interaction.reply({
           content: "コマンドの実行中にエラーが発生しました。",
-          ephemeral: true,
+          flags: [MessageFlags.Ephemeral],
         });
       }
     }

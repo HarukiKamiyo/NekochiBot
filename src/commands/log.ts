@@ -2,6 +2,7 @@
 import {
   SlashCommandBuilder,
   ChatInputCommandInteraction,
+  MessageFlags,
 } from "discord.js";
 import { getPraiseFromGemini } from "../gemini.js";
 
@@ -33,11 +34,12 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const totalMilliseconds = (hours * 60 * 60 + minutes * 60) * 1000;
 
   if (totalMilliseconds <= 0) {
-    return interaction.reply({
+    await interaction.reply({
       content:
         "活動時間を正しく入力してください（時間または分のどちらかは1以上である必要があります）。",
-      ephemeral: true,
+      flags: [MessageFlags.Ephemeral],
     });
+    return;
   }
 
   // deferReply を呼び出して、Gemini API の応答を待っている間にタイムアウトしないようにする
