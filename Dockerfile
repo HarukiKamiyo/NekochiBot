@@ -1,4 +1,4 @@
-FROM node:23-alpine
+FROM node:22.14.0-alpine
 
 # 作業ディレクトリを作成して移動
 WORKDIR /app
