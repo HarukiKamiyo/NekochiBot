@@ -49,7 +49,13 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       interaction.user.displayName,
       comment // getPraiseFromGemini に comment を渡す
     );
-    await interaction.editReply({ content: praise });
+
+    let replyContent = praise;
+    if (comment) {
+      replyContent = `> ${interaction.user.displayName}「${comment}」\n\n${praise}`;
+    }
+
+    await interaction.editReply({ content: replyContent });
   } catch (error) {
     console.error("Error in /log command:", error);
     await interaction.editReply({
