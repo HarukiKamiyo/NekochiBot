@@ -17,6 +17,9 @@
     "dotenv": "^16.4.5",
     "express": "^4.19.2"
   },
+  "overrides": {
+    "undici": "^6.23.0"
+  },
   "engines": {
     "node": "v22.14.0"
   },
