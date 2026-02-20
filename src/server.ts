@@ -9,7 +9,8 @@ app.get("/", (req, res) => {
 });
 
 export function startServer() {
-  app.listen(3000, () => {
-    console.log("Koyeb health check server listening on port 3000");
+  const port = process.env.PORT || 3000;
+  app.listen(port, () => {
+    console.log(`Koyeb health check server listening on port ${port}`);
   });
 }
