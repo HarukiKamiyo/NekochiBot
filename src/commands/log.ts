@@ -3,6 +3,7 @@ import {
   SlashCommandBuilder,
   ChatInputCommandInteraction,
   MessageFlags,
+  GuildMember,
 } from "discord.js";
 import { getPraiseFromGemini } from "../gemini.js";
 
@@ -46,15 +47,17 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply();
 
   try {
+    const displayName = (interaction.member as GuildMember)?.displayName ?? interaction.user.displayName;
+
     const praise = await getPraiseFromGemini(
       totalMilliseconds,
-      interaction.user.displayName,
+      displayName,
       comment // getPraiseFromGemini に comment を渡す
     );
 
     let replyContent = praise;
     if (comment) {
-      replyContent = `> ${interaction.user.displayName}「${comment}」\n\n${praise}`;
+      replyContent = `> ${displayName}「${comment}」\n\n${praise}`;
     }
 
     await interaction.editReply({ content: replyContent });
